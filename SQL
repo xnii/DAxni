@@ -7,12 +7,14 @@ ON Passenger.id = Pass_in_trip.passenger
 GROUP BY Passenger.id
 ORDER BY 2 DESC, 1
 
+
 Задание 2
 Сколько времени обучающийся будет находиться в школе, учась со 2-го по 4-ый уч. предмет ?
 
 SELECT DISTINCT
 TIMEDIFF((SELECT end_pair FROM Timepair WHERE id=4),
          (SELECT start_pair FROM Timepair WHERE id=2)) AS time
+
 
 Задание 3 
 Выведите список комнат, которые были зарезервированы в течение 12 недели 2020 года.
@@ -22,11 +24,30 @@ FROM Rooms INNER JOIN Reservations
 ON Rooms.id=Reservations.room_id
 WHERE WEEK(start_date, 1) = 12 AND YEAR(start_date)=2020
 
+
 Задание 4 
 Какой(ие) кабинет(ы) пользуются самым большим спросом?
+
 SELECT classroom 
 FROM Schedule 
 GROUP BY classroom 
 HAVING COUNT(classroom) = (SELECT MAX(quantity) 
                            FROM (SELECT COUNT(classroom) AS quantity
                            FROM Schedule GROUP BY classroom) AS number)
+                           
+                           
+Задание 5
+Для каждой пары последовательных дат, dt1 и dt2, поступления средств (таблица Income_o) найти сумму выдачи денег (таблица Outcome_o) в полуоткрытом интервале (dt1, dt2].
+
+                           
+Задание 6
+Cоставить отчет о битвах кораблей в два суперстолбца.
+
+WITH Report AS (SELECT ROW_NUMBER() OVER(ORDER BY date, name) battlenumber,
+COUNT(*) OVER() cnt, date, name
+FROM Battles)
+SELECT first.battlenumber, first.name, first.date,  
+       second.battlenumber, second.name, second.date
+FROM Report first LEFT JOIN Report second 
+ON first.battlenumber = second.battlenumber - (second.cnt / 2 + second.cnt % 2)
+WHERE first.battlenumber <= first.cnt / 2 + first.cnt % 2
