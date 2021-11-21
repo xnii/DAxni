@@ -39,15 +39,24 @@ HAVING COUNT(classroom) = (SELECT MAX(quantity)
 Задание 5
 Для каждой пары последовательных дат, dt1 и dt2, поступления средств (таблица Income_o) найти сумму выдачи денег (таблица Outcome_o) в полуоткрытом интервале (dt1, dt2].
 
+WITH Distinctdates AS (SELECT DISTINCT date from income_o),
+intervals AS (SELECT date dt1, LEAD(date) OVER (ORDER BY date) AS dt2 
+FROM Distinctdates)
+SELECT coalesce(sum(out), 0), dt1, dt2 
+FROM intervals LEFT JOIN Outcome_o 
+ON Outcome_o.date > dt1 AND Outcome_o.date <= dt2 
+WHERE dt2 IS NOT NULL
+GROUP BY dt1, dt2
+
                            
 Задание 6
 Cоставить отчет о битвах кораблей в два суперстолбца.
 
 WITH Report AS (SELECT ROW_NUMBER() OVER(ORDER BY date, name) battlenumber,
-COUNT(*) OVER() cnt, date, name
+COUNT(*) OVER() s, date, name
 FROM Battles)
 SELECT first.battlenumber, first.name, first.date,  
        second.battlenumber, second.name, second.date
 FROM Report first LEFT JOIN Report second 
-ON first.battlenumber = second.battlenumber - (second.cnt / 2 + second.cnt % 2)
-WHERE first.battlenumber <= first.cnt / 2 + first.cnt % 2
+ON first.battlenumber = second.battlenumber - (second.s / 2 + second.s % 2)
+WHERE first.battlenumber <= first.s / 2 + first.s % 2
